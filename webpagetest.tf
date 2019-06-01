@@ -1,7 +1,6 @@
 # Setting up the AWS Terraform provider
-# ADD YOUR TERRAFORM IAM USER DETAILS IN HERE
-# OR IN YOUR .aws PROFILE FILE
-# OR AS ENVIRONMENT VARIABLES
+# ADD YOUR TERRAFORM AWS IAM USER DETAILS IN HERE
+# OR IN YOUR .aws PROFILE FILE OR AS ENVIRONMENT VARIABLES
 provider "aws" {
   region = "${var.region}"
   profile       = "terraform"
@@ -11,7 +10,8 @@ variable "region" {
   default = "eu-west-1"
 }
 
-# FILL IN YOUR KEYPAIR NAME HERE:
+# FILL IN YOUR KEYPAIR NAME HERE,
+# OR OVERRIDE FROM THE COMMANDLINE:
 variable "keypair" {
     default = "wpt"
 }
@@ -53,7 +53,6 @@ resource "aws_instance" "webpagetest" {
   instance_type = "t2.micro"
   vpc_security_group_ids  = ["${aws_security_group.wpt-sg.id}"]
   
-  # FILL IN THIS PLACEHOLDER:
   key_name  = "${var.keypair}"
   
   user_data     = "${data.template_file.ec2_wpt_userdata.rendered}"
