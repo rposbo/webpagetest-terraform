@@ -4,6 +4,6 @@
 2. Go get [Terraform](https://www.terraform.io/downloads.html).
 3. Grab this repo and update the parts of `webpagetest.tf` where it tells you to.
 4. Read [this article](https://www.robinosborne.co.uk/2019/06/03/a-step-by-step-guide-to-using-terraform-to-define-an-autoscaling-private-webpagetest-instance-in-code/).
-5. `terraform apply`
+5. `terraform apply` (or override with `terraform apply -var 'keypair=MINE' -var 'region=us-east-1'`, for example)
 6. Your very own private, autoscaling, WebPageTest!
 7. ? Profit ?
