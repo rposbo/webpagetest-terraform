@@ -12,6 +12,10 @@ provider "aws" {
   }
 }
 
+locals {
+  keypair_content = file("${var.keypair_location}")
+}
+
 # random string to aim for a unique bucket name
 resource "random_string" "bucket" {
   length = 10
@@ -40,10 +44,6 @@ data "aws_ami" "ubuntu" {
 
   # Canonical
   owners = ["099720109477"] 
-}
-
-locals {
-  keypair_content = file("../your/wpt/file.pem")
 }
 
 resource "aws_instance" "wpt" {
@@ -153,6 +153,11 @@ resource "aws_security_group" "wpt-sg" {
 }
 
 variable "my_ip" {}
+
+variable "keypair_location" {
+  type = string
+  description = "location on local disk of your keypair file"
+}
 
 variable "crux_api_key" {
   type = string
