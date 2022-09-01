@@ -100,7 +100,7 @@ resource "aws_instance" "wpt" {
       }
     )
 
-    destination = "~/settings.ini"
+    destination = "/tmp/settings.ini"
 
     connection {
       host     = "${self.public_ip}"
@@ -112,7 +112,7 @@ resource "aws_instance" "wpt" {
 
     provisioner "file" {
         source = "locations.ini"
-        destination = "~/locations.ini"
+        destination = "/tmp/locations.ini"
 
     connection {
       host     = "${self.public_ip}"
@@ -126,7 +126,7 @@ resource "aws_instance" "wpt" {
   provisioner "remote-exec" {
     inline = [
       "sudo mkdir -p /var/www/webpagetest/www/settings/common/",
-      "sudo mv ~/*.ini /var/www/webpagetest/www/settings/common/"
+      "sudo mv /tmp/*.ini /var/www/webpagetest/www/settings/common/"
     ]
 
     connection {
