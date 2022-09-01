@@ -39,3 +39,17 @@ variable "keypair_location" {
   type = string
   description = "local location for the pem file of the named keypair"
 }
+
+variable "branch" {
+  type=string
+  default="release"
+  description = "the version of webpagetest to install; default is `release`, OSS version is `apache`"
+  
+  validation {
+    condition = contains(
+      ["release","apache"],
+      var.branch
+    )
+    error_message = "The specified branch is not valid."
+  }
+}

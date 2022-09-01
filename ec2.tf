@@ -27,11 +27,27 @@ resource "aws_instance" "webpagetest" {
   vpc_security_group_ids  = ["${aws_security_group.wpt-sg.id}"]  
   key_name  = "${var.keypair}"
 
+  provisioner "remote-exec" {
+    inline = [
+      "echo \"export WPT_BRANCH=${var.branch}\" >> /tmp/vars.sh",
+      "echo \"export DEBIAN_FRONTEND=noninteractive\" >> /tmp/vars.sh",
+      "sudo chmod +x /tmp/vars.sh"
+    ]
+
+    connection {
+      host     = "${self.public_ip}"
+      type     = "ssh"
+      user     = "ubuntu"
+      private_key = "${local.keypair_content}"
+    }
+  }
+
   # Upload and execute installation script from content/ dir
   provisioner "remote-exec" {
     inline = [
+      ". /tmp/vars.sh",
+
       # configure unattended update and upgrades
-      "sudo export DEBIAN_FRONTEND=noninteractive",
       "sudo apt-get -yq -o Dpkg::Options::=\"--force-confdef\" -o Dpkg::Options::=\"--force-confold\" update",
       "sudo apt-get -yq -o Dpkg::Options::=\"--force-confdef\" -o Dpkg::Options::=\"--force-confold\" upgrade",
       "sudo apt-get -yq -o Dpkg::Options::=\"--force-confdef\" -o Dpkg::Options::=\"--force-confold\" dist-upgrade",
@@ -62,7 +78,7 @@ resource "aws_instance" "webpagetest" {
       }
     )
 
-    destination = "~/settings.ini"
+    destination = "/tmp/settings.ini"
 
     connection {
       host     = "${self.public_ip}"
@@ -75,7 +91,7 @@ resource "aws_instance" "webpagetest" {
   # configure overrides locations.ini file  
   provisioner "file" {
     source = "content/locations.ini"
-    destination = "~/locations.ini"
+    destination = "/tmp/locations.ini"
 
     connection {
       host     = "${self.public_ip}"
@@ -89,7 +105,7 @@ resource "aws_instance" "webpagetest" {
   provisioner "remote-exec" {
     inline = [
       "sudo mkdir -p /var/www/webpagetest/www/settings/common/",
-      "sudo mv ~/*.ini /var/www/webpagetest/www/settings/common/"
+      "sudo mv /tmp/*.ini /var/www/webpagetest/www/settings/common/"
     ]
 
     connection {
