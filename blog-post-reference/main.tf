@@ -53,9 +53,25 @@ resource "aws_instance" "wpt" {
     vpc_security_group_ids  = ["${aws_security_group.wpt-sg.id}"]
 
     provisioner "remote-exec" {
-        inline = [
+      inline = [
+        "echo \"export WPT_BRANCH=${var.branch}\" >> /tmp/vars.sh",
+        "echo \"export DEBIAN_FRONTEND=noninteractive\" >> /tmp/vars.sh",
+        "sudo chmod +x /tmp/vars.sh"
+      ]
+
+      connection {
+        host     = "${self.public_ip}"
+        type     = "ssh"
+        user     = "ubuntu"
+        private_key = "${local.keypair_content}"
+      }
+    }
+
+  # Upload and execute installation script from content/ dir
+    provisioner "remote-exec" {
+      inline = [
+        ". /tmp/vars.sh",
         # configure unattended update and upgrades
-        "sudo export DEBIAN_FRONTEND=noninteractive",
         "sudo apt -yq -o Dpkg::Options::=\"--force-confdef\" -o Dpkg::Options::=\"--force-confold\" update",
         "sudo apt -yq -o Dpkg::Options::=\"--force-confdef\" -o Dpkg::Options::=\"--force-confold\" upgrade",
         "sudo apt -yq -o Dpkg::Options::=\"--force-confdef\" -o Dpkg::Options::=\"--force-confold\" dist-upgrade",
@@ -163,6 +179,20 @@ variable "crux_api_key" {
   type = string
   default = ""
   description = "Chrome UX API key to pull down CrUX data"
+}
+
+variable "branch" {
+  type=string
+  default="release"
+  description = "the version of webpagetest to install; default is `release`, OSS version is `apache`"
+  
+  validation {
+    condition = contains(
+      ["release","apache"],
+      var.branch
+    )
+    error_message = "The specified branch is not valid."
+  }
 }
 
 resource "aws_iam_user" "wpt-user" {
